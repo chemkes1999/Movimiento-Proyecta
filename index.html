@@ -1,636 +1,648 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Match Profesional — Movimiento Proyecta</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            teal: {
-              brand: '#17A8BC',
-              dark: '#0f8fa1',
-              light: '#e6f7fa',
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Match Profesional — Movimiento Proyecta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            teal: '#17A8BC',
+                            apricot: '#FDCDBD',
+                            dark: '#0f172a',
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Archivo Black', 'sans-serif'],
+                        body: ['Montserrat', 'sans-serif'],
+                    }
+                }
             }
-          },
-          fontFamily: {
-            display: ['"Barlow Condensed"', 'sans-serif'],
-            body: ['Barlow', 'sans-serif'],
-          }
         }
-      }
-    }
-  </script>
-  <style>
-    :root {
-      --teal: #17A8BC;
-      --teal-dark: #0f8fa1;
-    }
+    </script>
+    <style>
+        :root {
+            --brand-teal: #17A8BC;
+            --brand-apricot: #FDCDBD;
+            --brand-dark: #0f172a;
+            --teal-glow: rgba(23, 168, 188, 0.4);
+        }
 
-    * { scroll-behavior: smooth; }
+        * { scroll-behavior: smooth; }
 
-    body {
-      font-family: 'Barlow', sans-serif;
-      background: #fff;
-    }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #fff;
+            overflow-x: hidden;
+        }
 
-    /* Grain overlay */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1000;
-      opacity: 0.4;
-    }
+        /* Preloader */
+        #preloader {
+            position: fixed;
+            inset: 0;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1), visibility 0.8s;
+        }
 
-    .font-display { font-family: 'Barlow Condensed', sans-serif; }
+        .loader-logo {
+            width: 80px;
+            height: 80px;
+            background: var(--brand-teal);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: loader-pulse 2s infinite ease-in-out;
+        }
 
-    /* Nav */
-    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; }
+        @keyframes loader-pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(23, 168, 188, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px 10px rgba(23, 168, 188, 0.2); }
+        }
 
-    /* Hero diagonal cut */
-    .hero-clip {
-      clip-path: polygon(0 0, 100% 0, 100% 88%, 0 100%);
-    }
+        .loader-progress {
+            width: 200px;
+            height: 3px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-top: 32px;
+            overflow: hidden;
+            position: relative;
+        }
 
-    /* Animated underline */
-    .link-underline {
-      position: relative;
-    }
-    .link-underline::after {
-      content: '';
-      position: absolute;
-      bottom: -2px; left: 0;
-      width: 0; height: 2px;
-      background: white;
-      transition: width 0.3s ease;
-    }
-    .link-underline:hover::after { width: 100%; }
+        .loader-progress-fill {
+            position: absolute;
+            top: 0; left: 0;
+            height: 100%;
+            background: var(--brand-teal);
+            width: 0;
+        }
 
-    /* Feature card hover */
-    .feature-card {
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-    .feature-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 20px 40px rgba(23,168,188,0.18);
-    }
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.4;
+        }
 
-    /* Number badge */
-    .badge {
-      background: var(--teal);
-      color: white;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 1.5rem;
-      width: 3rem;
-      height: 3rem;
-      border-radius: 0.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
+        /* Nav */
+        nav { 
+            position: fixed; 
+            top: 0; left: 0; right: 0; 
+            z-index: 100;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+        }
+        nav.nav-hidden { transform: translateY(-100%); }
 
-    /* Stagger animations */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .fade-up { animation: fadeUp 0.7s ease forwards; opacity: 0; }
-    .delay-1 { animation-delay: 0.1s; }
-    .delay-2 { animation-delay: 0.25s; }
-    .delay-3 { animation-delay: 0.4s; }
-    .delay-4 { animation-delay: 0.55s; }
+        /* Hero diagonal cut */
+        .hero-clip {
+            clip-path: polygon(0 0, 100% 0, 100% 90%, 0 100%);
+        }
 
-    /* CTA pulse */
-    @keyframes pulse-ring {
-      0%   { box-shadow: 0 0 0 0 rgba(23,168,188,0.4); }
-      70%  { box-shadow: 0 0 0 14px rgba(23,168,188,0); }
-      100% { box-shadow: 0 0 0 0 rgba(23,168,188,0); }
-    }
-    .cta-btn { animation: pulse-ring 2.5s infinite; }
+        /* Animated underline */
+        .link-underline {
+            position: relative;
+        }
+        .link-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 0;
+            width: 0; height: 2px;
+            background: var(--brand-teal);
+            transition: width 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+        }
+        .link-underline:hover::after { width: 100%; }
 
-    /* Mobile mockup */
-    .phone-frame {
-      border: 3px solid #111;
-      border-radius: 2.5rem;
-      background: #111;
-      padding: 10px;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.25), inset 0 0 0 1px #333;
-      position: relative;
-    }
-    .phone-frame::before {
-      content: '';
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 4px;
-      background: #333;
-      border-radius: 2px;
-      z-index: 10;
-    }
-    .phone-screen {
-      border-radius: 2rem;
-      overflow: hidden;
-      background: var(--teal);
-    }
+        /* CTA pulse */
+        @keyframes pulse-ring {
+            0%   { box-shadow: 0 0 0 0 var(--teal-glow); }
+            70%  { box-shadow: 0 0 0 14px rgba(23, 168, 188, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(23, 168, 188, 0); }
+        }
+        .cta-btn { animation: pulse-ring 2.5s infinite; }
 
-    /* Decorative dots */
-    .dots-pattern {
-      background-image: radial-gradient(circle, rgba(23,168,188,0.15) 1px, transparent 1px);
-      background-size: 20px 20px;
-    }
+        /* Mobile mockup */
+        .phone-frame {
+            border: 3px solid #111;
+            border-radius: 2.5rem;
+            background: #111;
+            padding: 10px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.25), inset 0 0 0 1px #333;
+            position: relative;
+        }
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            z-index: 10;
+        }
+        .phone-screen {
+            border-radius: 2rem;
+            overflow: hidden;
+            background: var(--brand-teal);
+        }
 
-    /* Section divider wave */
-    .wave-divider svg { display: block; }
+        /* Scroll indicator */
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        .scroll-arrow { animation: bounce 1.5s ease-in-out infinite; }
 
-    /* Tag pill */
-    .tag {
-      display: inline-block;
-      background: rgba(23,168,188,0.12);
-      color: var(--teal);
-      font-weight: 600;
-      font-size: 0.75rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 0.3rem 0.85rem;
-      border-radius: 99px;
-      border: 1px solid rgba(23,168,188,0.3);
-    }
-
-    /* Scroll indicator */
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(8px); }
-    }
-    .scroll-arrow { animation: bounce 1.5s ease-in-out infinite; }
-
-    /* Stats number animation */
-    .stat-num {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 3.5rem;
-      color: var(--teal);
-      line-height: 1;
-    }
-  </style>
+        /* Custom Reveal Classes */
+        .reveal { opacity: 0; }
+        
+        /* Float Animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(3deg); }
+            50% { transform: translateY(-15px) rotate(1deg); }
+        }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+    </style>
 </head>
-<body class="overflow-x-hidden">
+<body class="overflow-x-hidden antialiased">
 
-  <!-- NAV -->
-  <nav class="bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
-    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-      <!-- Logo text mark -->
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-md flex items-center justify-center" style="background:var(--teal)">
-          <span class="text-white font-display font-black text-sm leading-none">mp</span>
+    <!-- PRELOADER -->
+    <div id="preloader">
+        <div class="loader-logo">
+            <span class="text-white font-display font-black text-3xl">mp</span>
         </div>
-        <div class="leading-tight">
-          <span class="font-display font-black text-base tracking-tight" style="color:var(--teal)">movimiento</span><br/>
-          <span class="font-display font-black text-base tracking-tight" style="color:var(--teal)">proyecta</span>
+        <div class="text-center">
+            <h2 class="font-display font-black text-2xl tracking-tighter uppercase" style="color:var(--brand-teal)">Movimiento</h2>
+            <h2 class="font-display font-black text-2xl tracking-tighter uppercase" style="color:var(--brand-teal)">Proyecta</h2>
         </div>
-      </div>
-
-      <!-- Nav links -->
-      <div class="hidden md:flex items-center gap-8">
-        <a href="#propuesta" class="text-gray-600 hover:text-teal-brand font-medium text-sm transition-colors">La Propuesta</a>
-        <a href="#features" class="text-gray-600 hover:text-teal-brand font-medium text-sm transition-colors">Qué incluye</a>
-        <a href="#stats" class="text-gray-600 hover:text-teal-brand font-medium text-sm transition-colors">Impacto</a>
-        <a href="#registro" class="px-5 py-2 rounded-full text-white text-sm font-semibold transition-all hover:opacity-90 hover:scale-105" style="background:var(--teal)">
-          Regístrate
-        </a>
-      </div>
-
-      <!-- Mobile menu btn -->
-      <button class="md:hidden text-gray-600" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-      </button>
+        <div class="loader-progress">
+            <div class="loader-progress-fill" id="loader-fill"></div>
+        </div>
     </div>
-    <!-- Mobile menu -->
-    <div id="mobile-menu" class="hidden md:hidden px-6 pb-4 flex flex-col gap-3">
-      <a href="#propuesta" class="text-gray-600 font-medium text-sm">La Propuesta</a>
-      <a href="#features" class="text-gray-600 font-medium text-sm">Qué incluye</a>
-      <a href="#stats" class="text-gray-600 font-medium text-sm">Impacto</a>
-      <a href="#registro" class="px-5 py-2 rounded-full text-white text-sm font-semibold text-center" style="background:var(--teal)">Regístrate</a>
-    </div>
-  </nav>
 
-  <!-- HERO -->
-  <section class="hero-clip relative pt-24 pb-40 overflow-hidden" style="background:var(--teal)">
-    <!-- Background decorative circles -->
-    <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full opacity-10" style="background:white"></div>
-    <div class="absolute bottom-20 -left-16 w-56 h-56 rounded-full opacity-10" style="background:white"></div>
-    <div class="absolute top-1/2 left-1/3 w-4 h-4 rounded-full opacity-20" style="background:white"></div>
-    <div class="absolute top-1/3 right-1/4 w-6 h-6 rounded-full opacity-15" style="background:white"></div>
-
-    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
-      <!-- Text -->
-      <div class="text-white">
-        <div class="mb-4 fade-up delay-1">
-          <span class="inline-block bg-white/20 text-white text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full border border-white/30">
-            Propuesta #1 · Movimiento Proyecta
-          </span>
-        </div>
-
-        <h1 class="font-display font-black uppercase leading-none mb-4 fade-up delay-2" style="font-size: clamp(3.5rem, 9vw, 7rem); line-height: 0.9">
-          MATCH<br/>
-          <span class="text-white/80">PROFE</span>SIONAL
-        </h1>
-
-        <p class="text-white/85 text-lg leading-relaxed mb-8 max-w-md fade-up delay-3">
-          Una plataforma que conecta a los estudiantes con oportunidades reales de crecimiento académico y laboral. Todo en un solo espacio digital.
-        </p>
-
-        <div class="flex flex-wrap gap-4 fade-up delay-4">
-          <a href="#registro" class="cta-btn px-8 py-3.5 bg-white font-bold text-sm rounded-full transition-all hover:scale-105" style="color:var(--teal)">
-            Únete ahora
-          </a>
-          <a href="#features" class="px-8 py-3.5 border-2 border-white/60 text-white font-bold text-sm rounded-full hover:bg-white/10 transition-all">
-            Ver más ↓
-          </a>
-        </div>
-
-        <div class="mt-10 flex items-center gap-2 fade-up delay-4">
-          <div class="scroll-arrow text-white/50">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </div>
-          <span class="text-white/50 text-xs">Descubre la plataforma</span>
-        </div>
-      </div>
-
-      <!-- Phone mockup -->
-      <div class="flex justify-center md:justify-end fade-up delay-3">
-        <div class="phone-frame w-56 md:w-64" style="transform: rotate(3deg)">
-          <div class="phone-screen" style="min-height: 420px; background: var(--teal)">
-            <!-- Phone screen content -->
-            <div class="p-4 flex flex-col h-full" style="min-height:420px">
-              <!-- Browser bar -->
-              <div class="bg-white rounded-lg px-3 py-1.5 mb-4 flex items-center gap-2">
-                <div class="flex gap-1">
-                  <div class="w-2 h-2 rounded-full bg-red-400"></div>
-                  <div class="w-2 h-2 rounded-full bg-yellow-400"></div>
-                  <div class="w-2 h-2 rounded-full bg-green-400"></div>
+    <!-- NAV -->
+    <nav id="main-nav" class="bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 group cursor-pointer">
+                <div class="w-8 h-8 rounded-md flex items-center justify-center transition-transform group-hover:rotate-12" style="background:var(--brand-teal)">
+                    <span class="text-white font-display font-black text-sm leading-none">mp</span>
                 </div>
-                <div class="flex-1 bg-gray-100 rounded px-2 py-0.5 text-xs text-gray-400">matchprofesional.mp</div>
-              </div>
+                <div class="leading-tight">
+                    <span class="font-display font-black text-base tracking-tight uppercase" style="color:var(--brand-teal)">movimiento</span><br/>
+                    <span class="font-display font-black text-base tracking-tight uppercase" style="color:var(--brand-teal)">proyecta</span>
+                </div>
+            </div>
 
-              <!-- Screen hero -->
-              <div class="text-center mb-4">
-                <p class="text-white/70 text-xs font-semibold tracking-widest uppercase mb-1">Movimiento Proyecta</p>
-                <h2 class="font-display font-black text-white uppercase text-3xl leading-tight">
-                  MATCH<br/>PROFESIONAL
+            <!-- Links -->
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#inicio" class="link-underline text-gray-600 hover:text-brand-teal font-bold text-xs uppercase tracking-widest transition-colors">Inicio</a>
+                <a href="#valores" class="link-underline text-gray-600 hover:text-brand-teal font-bold text-xs uppercase tracking-widest transition-colors">Valores</a>
+                <a href="#match" class="link-underline text-gray-600 hover:text-brand-teal font-bold text-xs uppercase tracking-widest transition-colors">Match Profesional</a>
+                <a href="#global" class="link-underline text-gray-600 hover:text-brand-teal font-bold text-xs uppercase tracking-widest transition-colors">Global Link</a>
+                <a href="#registro" class="px-8 py-2.5 rounded-full text-white text-xs font-black uppercase tracking-widest transition-all hover:shadow-lg hover:shadow-teal-500/30 hover:-translate-y-0.5" style="background:var(--brand-teal)">
+                    Unirme
+                </a>
+            </div>
+
+            <button class="md:hidden text-gray-600" onclick="document.getElementById('mobile-menu').classList.toggle('hidden')">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-6 pb-6 pt-2 flex flex-col gap-4 bg-white border-t border-gray-50">
+            <a href="#inicio" class="text-gray-600 font-bold text-sm py-2 uppercase tracking-widest" onclick="this.parentElement.classList.add('hidden')">Inicio</a>
+            <a href="#valores" class="text-gray-600 font-bold text-sm py-2 uppercase tracking-widest" onclick="this.parentElement.classList.add('hidden')">Valores</a>
+            <a href="#match" class="text-gray-600 font-bold text-sm py-2 uppercase tracking-widest" onclick="this.parentElement.classList.add('hidden')">Match Profesional</a>
+            <a href="#global" class="text-gray-600 font-bold text-sm py-2 uppercase tracking-widest" onclick="this.parentElement.classList.add('hidden')">Global Link</a>
+            <a href="#registro" class="py-4 rounded-xl text-white font-black text-center uppercase tracking-widest" style="background:var(--brand-teal)" onclick="this.parentElement.classList.add('hidden')">Unirme ahora</a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section id="inicio" class="hero-clip relative pt-40 pb-48 overflow-hidden" style="background:var(--brand-teal)">
+        <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full opacity-10 bg-white"></div>
+        <div class="absolute bottom-20 -left-16 w-64 h-64 rounded-full opacity-10 bg-white"></div>
+
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-[1.1fr,0.9fr] lg:grid-cols-2 gap-16 items-center relative z-10">
+            <div class="text-white">
+                <div class="mb-8 reveal hero-stagger">
+                    <span class="inline-block bg-white/10 backdrop-blur-sm text-white text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full border border-white/20">
+                        Propuesta #1 · Movimiento Proyecta
+                    </span>
+                </div>
+
+                <h1 class="font-display font-black uppercase leading-[0.85] mb-8 reveal hero-stagger" style="font-size: clamp(2rem, 6vw, 5.5rem); letter-spacing: -0.04em;">
+                    MATCH<br/>
+                    <span class="text-brand-apricot italic">PROFE</span>SIONAL
+                </h1>
+
+                <p class="text-white/80 text-xl md:text-2xl leading-relaxed mb-12 max-w-lg reveal hero-stagger">
+                    La plataforma que conecta tu talento con las mejores oportunidades. 
+                    <span class="font-bold text-white">Diseñada por estudiantes, para estudiantes.</span>
+                </p>
+
+                <div class="flex flex-wrap gap-6 reveal hero-stagger">
+                    <a href="#registro" class="cta-btn px-10 py-5 bg-white font-black text-sm uppercase tracking-widest rounded-full transition-all hover:scale-105 shadow-xl" style="color:var(--brand-teal)">
+                        Comenzar mi viaje
+                    </a>
+                    <a href="#valores" class="px-10 py-5 border-2 border-white/30 text-white font-black text-sm uppercase tracking-widest rounded-full hover:bg-white/10 transition-all backdrop-blur-sm">
+                        Saber más
+                    </a>
+                </div>
+
+                <div class="mt-20 flex items-center gap-4 reveal hero-stagger opacity-50">
+                    <div class="scroll-arrow">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                    </div>
+                    <span class="text-xs font-bold uppercase tracking-widest">Desliza para descubrir</span>
+                </div>
+            </div>
+
+            <div class="flex justify-center md:justify-end reveal hero-image">
+                <div class="phone-frame w-72 md:w-80 float-anim shadow-2xl">
+                    <div class="phone-screen" style="min-height: 520px; background: var(--brand-teal)">
+                        <div class="p-6 flex flex-col h-full" style="min-height:520px">
+                            <div class="bg-white/90 backdrop-blur rounded-2xl px-5 py-3 mb-8 flex items-center gap-4 shadow-lg">
+                                <div class="flex gap-2">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-red-400"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div>
+                                </div>
+                                <div class="flex-1 bg-gray-100 rounded-lg px-3 py-1.5 text-[10px] text-gray-400 font-mono">proyecta.mp</div>
+                            </div>
+
+                            <div class="text-center mb-8">
+                                <p class="text-white/60 text-[10px] font-bold tracking-[0.2em] uppercase mb-3">Movimiento Proyecta</p>
+                                <h2 class="font-display font-black text-white uppercase text-3xl leading-[0.9]">
+                                    MATCH<br/>PROFESIONAL
+                                </h2>
+                            </div>
+
+                            <div class="flex justify-center mb-10">
+                                <div class="w-24 h-24 rounded-[2rem] border-2 border-white/20 flex items-center justify-center rotate-12 bg-white/5 backdrop-blur-sm shadow-xl">
+                                    <span class="font-display font-black text-white text-4xl">mp</span>
+                                </div>
+                            </div>
+
+                            <div class="w-full bg-white/10 rounded-full h-2 mb-8 overflow-hidden">
+                                <div class="h-full bg-white shadow-[0_0_15px_white]" style="width: 70%"></div>
+                            </div>
+
+                            <div class="flex-1 rounded-3xl overflow-hidden bg-white/10 backdrop-blur-md border border-white/20 p-6 flex flex-col items-center justify-center text-center">
+                                <div class="w-14 h-14 rounded-full bg-brand-apricot flex items-center justify-center mb-4 shadow-lg">
+                                    <svg class="w-7 h-7 text-brand-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                </div>
+                                <p class="text-white text-base font-black uppercase tracking-widest mb-1">Conecta ahora</p>
+                                <p class="text-white/60 text-xs">Tu futuro empieza hoy</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VALORES -->
+    <section id="valores" class="py-32 bg-white relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-24 reveal reveal-up">
+                <span class="inline-block bg-brand-teal/10 text-brand-teal text-xs font-black uppercase tracking-[0.3em] px-5 py-2 rounded-full mb-6">Nuestra Esencia</span>
+                <h2 class="font-display font-black text-5xl md:text-7xl text-gray-900 uppercase leading-none">Valores que nos mueven</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-10">
+                <div class="p-10 rounded-[2.5rem] bg-gray-50 border border-gray-100 hover:border-brand-teal/30 transition-all group reveal reveal-up">
+                    <div class="w-16 h-16 bg-brand-teal/10 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <h3 class="font-display font-black text-3xl mb-6 uppercase tracking-tight">INNOVACIÓN</h3>
+                    <p class="text-gray-500 text-lg leading-relaxed">Buscamos constantemente nuevas formas de impulsar el aprendizaje y la proyección fuera de la institución.</p>
+                </div>
+                <div class="p-10 rounded-[2.5rem] bg-gray-50 border border-gray-100 hover:border-brand-apricot/30 transition-all group reveal reveal-up" style="transition-delay: 0.1s">
+                    <div class="w-16 h-16 bg-brand-apricot/20 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-brand-apricot" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <h3 class="font-display font-black text-3xl mb-6 uppercase tracking-tight text-gray-900">COLABORACIÓN</h3>
+                    <p class="text-gray-500 text-lg leading-relaxed">Fomentamos el trabajo en equipo y el apoyo mutuo entre estudiantes para alcanzar el éxito colectivo.</p>
+                </div>
+                <div class="p-10 rounded-[2.5rem] bg-gray-50 border border-gray-100 hover:border-brand-teal/30 transition-all group reveal reveal-up" style="transition-delay: 0.2s">
+                    <div class="w-16 h-16 bg-brand-teal/10 rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+                        <svg class="w-8 h-8 text-brand-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    </div>
+                    <h3 class="font-display font-black text-3xl mb-6 uppercase tracking-tight">PROYECCIÓN</h3>
+                    <p class="text-gray-500 text-lg leading-relaxed">Impulsamos una visión futura que amplíe las oportunidades académicas y laborales de nuestra comunidad.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MATCH PROFESIONAL -->
+    <section id="match" class="py-32 bg-gray-50 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-20 items-center">
+                <div class="reveal reveal-left">
+                    <span class="inline-block bg-brand-teal text-white text-xs font-black uppercase tracking-[0.3em] px-5 py-2 rounded-full mb-8">Propuesta #1</span>
+                    <h2 class="font-display font-black text-5xl md:text-6xl text-gray-900 leading-[0.85] mb-10 uppercase" style="letter-spacing: -0.04em;">Match<br/><span class="text-brand-teal">Profesional</span></h2>
+                    <p class="text-gray-600 text-2xl leading-relaxed mb-10 italic">"Una iniciativa integral que conecte a los estudiantes con oportunidades reales de crecimiento académico y laboral."</p>
+                    <ul class="space-y-6">
+                        <li class="flex items-start gap-5 group">
+                            <div class="mt-1.5 w-6 h-6 rounded-full bg-brand-teal/20 flex items-center justify-center shrink-0 group-hover:bg-brand-teal group-hover:text-white transition-all">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                            </div>
+                            <p class="text-gray-600 text-lg font-medium">Vinculación con empresas para prácticas de calidad</p>
+                        </li>
+                        <li class="flex items-start gap-5 group">
+                            <div class="mt-1.5 w-6 h-6 rounded-full bg-brand-teal/20 flex items-center justify-center shrink-0 group-hover:bg-brand-teal group-hover:text-white transition-all">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                            </div>
+                            <p class="text-gray-600 text-lg font-medium">Bolsa de trabajo enfocada en la carrera</p>
+                        </li>
+                        <li class="flex items-start gap-5 group">
+                            <div class="mt-1.5 w-6 h-6 rounded-full bg-brand-teal/20 flex items-center justify-center shrink-0 group-hover:bg-brand-teal group-hover:text-white transition-all">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                            </div>
+                            <p class="text-gray-600 text-lg font-medium">Talleres para fortalecer CV, portafolio e imagen</p>
+                        </li>
+                    </ul>
+                </div>
+                <div class="relative reveal reveal-right">
+                    <div class="absolute -inset-10 bg-brand-teal/10 blur-[120px] rounded-full"></div>
+                    <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&q=80" alt="Networking" class="relative rounded-[3rem] shadow-2xl border-[12px] border-white transition-transform hover:scale-[1.02] duration-500">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- GLOBAL LINK -->
+    <section id="global" class="py-32 bg-white overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid md:grid-cols-2 gap-20 items-center">
+                <div class="relative order-2 md:order-1 reveal reveal-left">
+                    <div class="absolute -inset-10 bg-brand-apricot/10 blur-[120px] rounded-full"></div>
+                    <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80" alt="Estudios Extranjero" class="relative rounded-[3rem] shadow-2xl border-[12px] border-white transition-transform hover:scale-[1.02] duration-500">
+                </div>
+                <div class="order-1 md:order-2 reveal reveal-right">
+                    <span class="inline-block bg-brand-apricot text-brand-dark text-xs font-black uppercase tracking-[0.3em] px-5 py-2 rounded-full mb-8">Propuesta #2</span>
+                    <h2 class="font-display font-black text-5xl md:text-6xl text-gray-900 leading-[0.85] mb-10 uppercase" style="letter-spacing: -0.04em;">Global<br/><span class="text-brand-apricot">Link</span></h2>
+                    <p class="text-gray-600 text-2xl leading-relaxed mb-10 italic">"Expandiendo las oportunidades más allá del aula y del país con una visión internacional."</p>
+                    <ul class="space-y-6">
+                        <li class="flex items-start gap-5 group">
+                            <div class="mt-1.5 w-6 h-6 rounded-full bg-brand-apricot/30 flex items-center justify-center shrink-0 group-hover:bg-brand-apricot group-hover:text-brand-dark transition-all">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                            </div>
+                            <p class="text-gray-600 text-lg font-medium">Convenios para intercambios y estudios en el extranjero</p>
+                        </li>
+                        <li class="flex items-start gap-5 group">
+                            <div class="mt-1.5 w-6 h-6 rounded-full bg-brand-apricot/30 flex items-center justify-center shrink-0 group-hover:bg-brand-apricot group-hover:text-brand-dark transition-all">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                            </div>
+                            <p class="text-gray-600 text-lg font-medium">Acompañamiento para programas internacionales</p>
+                        </li>
+                        <li class="flex items-start gap-5 group">
+                            <div class="mt-1.5 w-6 h-6 rounded-full bg-brand-apricot/30 flex items-center justify-center shrink-0 group-hover:bg-brand-apricot group-hover:text-brand-dark transition-all">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                            </div>
+                            <p class="text-gray-600 text-lg font-medium">Talleres de habilidades blandas y networking</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LIDERAZGO Y VISIÓN -->
+    <section id="vision" class="py-32 bg-brand-dark text-white overflow-hidden relative">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 50px 50px;"></div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="grid md:grid-cols-2 gap-24 items-center">
+                <div class="reveal reveal-left">
+                    <span class="inline-block bg-white/10 text-white text-xs font-black uppercase tracking-[0.4em] px-6 py-2.5 rounded-full mb-10">Nuestro Compromiso</span>
+                    <h2 class="font-display font-black text-6xl md:text-7xl mb-12 uppercase leading-none" style="letter-spacing: -0.04em;">Liderazgo<br/><span class="text-brand-teal">Colectivo</span></h2>
+                    <p class="text-white/60 text-2xl leading-relaxed mb-12">
+                        Un equipo apasionado que busca transformar el panorama estudiantil mediante la excelencia, la honestidad y la vinculación real con el mundo profesional.
+                    </p>
+                    <div class="flex gap-6">
+                        <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10 flex-1 hover:bg-white/10 transition-all">
+                            <p class="text-brand-apricot font-black text-sm uppercase tracking-widest mb-3">Visión</p>
+                            <p class="text-white/80 text-base">Empoderar a cada estudiante para destacar en el mercado global.</p>
+                        </div>
+                        <div class="bg-white/5 p-8 rounded-[2rem] border border-white/10 flex-1 hover:bg-white/10 transition-all">
+                            <p class="text-brand-teal font-black text-sm uppercase tracking-widest mb-3">Valores</p>
+                            <p class="text-white/80 text-base">Un compromiso auténtico con la transparencia y el crecimiento mutuo.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative reveal reveal-right flex justify-center">
+                    <div class="absolute -inset-10 bg-brand-teal/20 blur-[150px] rounded-full"></div>
+                    <div class="relative w-full max-w-md">
+                        <div class="absolute inset-0 border-4 border-brand-teal rounded-[4rem] rotate-6 translate-x-6 translate-y-6 opacity-30"></div>
+                        <div class="relative aspect-[4/3] rounded-[4rem] overflow-hidden border-8 border-white/10 shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80" alt="Equipo Proyecta" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- CTA REGISTRO -->
+    <section id="registro" class="py-32 bg-gray-50 relative overflow-hidden">
+        <div class="max-w-4xl mx-auto px-6 text-center relative z-10">
+            <div class="reveal reveal-up">
+                <span class="inline-block bg-brand-teal/10 text-brand-teal text-xs font-black uppercase tracking-[0.4em] px-6 py-2.5 rounded-full mb-10">Únete al movimiento</span>
+                <h2 class="font-display font-black uppercase text-6xl md:text-8xl text-gray-900 leading-[0.85] mb-12">
+                    TU MOMENTO<br/><span class="text-brand-teal">ES AHORA.</span>
                 </h2>
-                <div class="mt-2 w-12 h-0.5 bg-white/40 mx-auto rounded"></div>
-              </div>
+                <p class="text-gray-500 text-2xl mb-20 max-w-2xl mx-auto leading-relaxed">
+                    Sé parte de la plataforma que transformará tu futuro profesional. <span class="font-bold text-gray-900">Regístrate hoy mismo.</span>
+                </p>
+            </div>
 
-              <!-- Logo mark -->
-              <div class="flex justify-center mb-4">
-                <div class="w-16 h-16 rounded-full border-2 border-white/30 flex items-center justify-center" style="background:rgba(255,255,255,0.1)">
-                  <span class="font-display font-black text-white text-2xl">mp</span>
+            <form class="reveal reveal-up bg-white rounded-[3rem] p-12 md:p-20 shadow-2xl shadow-gray-200/50 border border-gray-100 text-left transition-transform hover:scale-[1.01]" onsubmit="handleSubmit(event)">
+                <div class="grid md:grid-cols-2 gap-10 mb-10">
+                    <div class="space-y-3">
+                        <label class="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Nombre completo</label>
+                        <input type="text" placeholder="Juan Pérez" required class="w-full px-8 py-5 rounded-[1.5rem] border border-gray-200 focus:outline-none transition-all text-lg bg-gray-50/50" />
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">Correo institucional</label>
+                        <input type="email" placeholder="nombre@universidad.edu" required class="w-full px-8 py-5 rounded-[1.5rem] border border-gray-200 focus:outline-none transition-all text-lg bg-gray-50/50" />
+                    </div>
                 </div>
-              </div>
-
-              <!-- Progress bar -->
-              <div class="w-full bg-white/20 rounded-full h-1 mb-4">
-                <div class="h-1 rounded-full bg-white" style="width:70%"></div>
-              </div>
-
-              <!-- Image placeholder -->
-              <div class="flex-1 rounded-xl overflow-hidden" style="background: rgba(255,255,255,0.15); min-height: 120px; display:flex; align-items:center; justify-content:center;">
-                <div class="text-center text-white/60">
-                  <svg class="w-10 h-10 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  <p class="text-xs font-medium">Conecta · Crece · Destaca</p>
+                <div class="space-y-3 mb-12">
+                    <label class="block text-xs font-black text-gray-700 uppercase tracking-widest ml-2">¿Qué es lo que más te interesa?</label>
+                    <div class="relative">
+                        <select required class="w-full px-8 py-5 rounded-[1.5rem] border border-gray-200 focus:outline-none transition-all text-lg bg-gray-50/50 appearance-none cursor-pointer">
+                            <option value="">Selecciona tu prioridad</option>
+                            <option>Bolsa de trabajo exclusiva</option>
+                            <option>Prácticas profesionales</option>
+                            <option>Talleres de especialización</option>
+                            <option>Conexión con egresados</option>
+                            <option>Créditos académicos</option>
+                        </select>
+                        <div class="absolute right-8 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                    </div>
                 </div>
-              </div>
+                <button type="submit" class="w-full py-6 rounded-[1.5rem] text-white font-black text-xl uppercase tracking-[0.2em] transition-all hover:shadow-[0_20px_50px_rgba(23,168,188,0.3)] active:scale-[0.98] flex items-center justify-center gap-4" style="background:var(--brand-teal)">
+                    Regístrate <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </form>
+
+            <div id="success-msg" class="hidden mt-12 p-10 rounded-[2rem] text-white font-black text-2xl shadow-2xl animate-bounce" style="background:var(--brand-teal)">
+                ¡Bienvenido al movimiento! 🎉<br/>
+                <span class="text-lg font-medium opacity-80 uppercase tracking-widest mt-2 block">Te hemos enviado un correo.</span>
             </div>
-          </div>
         </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- WAVE DIVIDER -->
-  <div class="wave-divider -mt-2" style="background:white">
-    <svg viewBox="0 0 1440 40" preserveAspectRatio="none" style="height:40px;width:100%;display:block;" fill="var(--teal)">
-      <path d="M0,40 L0,0 Q360,40 720,20 Q1080,0 1440,20 L1440,40 Z"/>
-    </svg>
-  </div>
+    <!-- FOOTER -->
+    <footer style="background:#050505" class="text-white py-24 relative overflow-hidden">
+        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] bg-brand-teal/5 blur-[150px] rounded-full pointer-events-none"></div>
 
-  <!-- PROPUESTA INTRO -->
-  <section id="propuesta" class="py-20 bg-white">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="grid md:grid-cols-2 gap-16 items-center">
-        <div>
-          <span class="tag mb-4 block">La Iniciativa</span>
-          <h2 class="font-display font-black uppercase text-5xl md:text-6xl text-gray-900 leading-tight mb-6">
-            TU FUTURO,<br/>
-            <span style="color:var(--teal)">EN UN SOLO<br/>LUGAR.</span>
-          </h2>
-          <p class="text-gray-600 text-lg leading-relaxed">
-            Como parte de esta propuesta, <strong>Movimiento Proyecta</strong> desarrollará una plataforma web donde los estudiantes podrán acceder de manera fácil y organizada a todas las herramientas necesarias para su desarrollo profesional.
-          </p>
-          <p class="text-gray-500 mt-4 leading-relaxed">
-            El objetivo es centralizar toda la información en un solo espacio digital, accesible y funcional, que impulse a los estudiantes a prepararse, conectar y aprovechar oportunidades reales para su futuro profesional.
-          </p>
-        </div>
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-16">
+                <div class="flex items-center gap-6 group">
+                    <div class="w-16 h-16 rounded-[1.5rem] flex items-center justify-center transition-transform group-hover:rotate-12 group-hover:scale-110 shadow-lg" style="background:var(--brand-teal)">
+                        <span class="font-display font-black text-white text-2xl">mp</span>
+                    </div>
+                    <div>
+                        <p class="font-display font-black text-3xl leading-tight uppercase tracking-tight" style="color:var(--brand-teal)">Movimiento Proyecta</p>
+                        <p class="text-gray-500 text-xs font-black uppercase tracking-[0.3em] mt-1">Match Profesional · 2025</p>
+                    </div>
+                </div>
 
-        <!-- Stats block -->
-        <div class="grid grid-cols-2 gap-6">
-          <div class="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-            <div class="stat-num">5</div>
-            <p class="text-gray-600 font-medium mt-1">Herramientas integradas</p>
-          </div>
-          <div class="rounded-2xl p-6 text-white" style="background:var(--teal)">
-            <div class="font-display font-black text-white" style="font-size:3.5rem;line-height:1">100%</div>
-            <p class="text-white/80 font-medium mt-1">Gratuito para estudiantes</p>
-          </div>
-          <div class="rounded-2xl p-6 text-white col-span-2" style="background:#111">
-            <p class="text-white/60 text-sm font-semibold uppercase tracking-widest mb-2">Slogan</p>
-            <p class="font-display font-black text-3xl text-white uppercase">"Conecta. Crece. Destaca."</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+                <div class="text-center">
+                    <p class="font-display font-black text-3xl md:text-5xl uppercase leading-none tracking-tighter">
+                        CONECTA.<br/>CRECE.<br/><span class="text-brand-teal">DESTACA.</span>
+                    </p>
+                </div>
 
-  <!-- FEATURES -->
-  <section id="features" class="py-24 dots-pattern bg-gray-50">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <span class="tag mb-4 inline-block">Qué incluye la plataforma</span>
-        <h2 class="font-display font-black uppercase text-5xl md:text-6xl text-gray-900 leading-tight">
-          TODO LO QUE<br/><span style="color:var(--teal)">NECESITAS</span>
-        </h2>
-      </div>
-
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        <!-- Feature 1 -->
-        <div class="feature-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
-          <div class="flex items-start gap-4 mb-5">
-            <div class="badge">1</div>
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(23,168,188,0.1)">
-              <svg class="w-5 h-5" style="color:var(--teal)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
+                <div class="text-gray-500 text-sm text-center md:text-right">
+                    <p class="font-black text-gray-400 mb-3 uppercase tracking-[0.3em]">Movimiento Proyecta</p>
+                    <div class="space-y-1 font-bold opacity-60">
+                        <p>Liliana · Cristy</p>
+                        <p>Sofia · Proyecta Team</p>
+                    </div>
+                </div>
             </div>
-          </div>
-          <h3 class="font-display font-black uppercase text-2xl text-gray-900 mb-3">Bolsa de Trabajo</h3>
-          <p class="text-gray-500 text-sm leading-relaxed">Vacantes relevantes y actualizadas especializadas por carrera, con notificaciones por sectores de empresas.</p>
-          <div class="mt-5 pt-5 border-t border-gray-100 flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full" style="background:var(--teal)"></div>
-            <span class="text-xs text-gray-400 font-medium">Actualización en tiempo real</span>
-          </div>
-        </div>
 
-        <!-- Feature 2 -->
-        <div class="feature-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
-          <div class="flex items-start gap-4 mb-5">
-            <div class="badge">2</div>
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(23,168,188,0.1)">
-              <svg class="w-5 h-5" style="color:var(--teal)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-              </svg>
+            <div class="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+                <p class="text-gray-600 text-xs font-bold uppercase tracking-widest">© 2025 Movimiento Proyecta. Todos los derechos reservados.</p>
+                <div class="flex gap-10">
+                    <a href="#" class="text-gray-600 hover:text-brand-teal transition-colors text-xs font-black uppercase tracking-[0.3em]">Privacidad</a>
+                    <a href="#" class="text-gray-600 hover:text-brand-teal transition-colors text-xs font-black uppercase tracking-[0.3em]">Términos</a>
+                </div>
             </div>
-          </div>
-          <h3 class="font-display font-black uppercase text-2xl text-gray-900 mb-3">Vinculación Empresarial</h3>
-          <p class="text-gray-500 text-sm leading-relaxed">Conexión directa con empresas para facilitar el acceso a prácticas profesionales de calidad en tu área.</p>
-          <div class="mt-5 pt-5 border-t border-gray-100 flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full" style="background:var(--teal)"></div>
-            <span class="text-xs text-gray-400 font-medium">Alianzas con empresas reales</span>
-          </div>
         </div>
+    </footer>
 
-        <!-- Feature 3 -->
-        <div class="feature-card rounded-2xl p-7 text-white" style="background:var(--teal)">
-          <div class="flex items-start gap-4 mb-5">
-            <div class="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center font-display font-black text-2xl text-white">3</div>
-            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-            </div>
-          </div>
-          <h3 class="font-display font-black uppercase text-2xl text-white mb-3">Calendario de Talleres</h3>
-          <p class="text-white/80 text-sm leading-relaxed">Capacitaciones enfocadas en fortalecer tu CV, portafolio e imagen profesional para destacar ante empleadores.</p>
-          <div class="mt-5 pt-5 border-t border-white/20 flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-white/60"></div>
-            <span class="text-xs text-white/60 font-medium">Actualizaciones mensuales</span>
-          </div>
-        </div>
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
 
-        <!-- Feature 4 -->
-        <div class="feature-card bg-white rounded-2xl p-7 border border-gray-100 shadow-sm">
-          <div class="flex items-start gap-4 mb-5">
-            <div class="badge">4</div>
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(23,168,188,0.1)">
-              <svg class="w-5 h-5" style="color:var(--teal)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-              </svg>
-            </div>
-          </div>
-          <h3 class="font-display font-black uppercase text-2xl text-gray-900 mb-3">Charlas con Egresados</h3>
-          <p class="text-gray-500 text-sm leading-relaxed">Calendario mensual de pláticas con egresados y expertos del medio que aporten experiencia y orientación real.</p>
-          <div class="mt-5 pt-5 border-t border-gray-100 flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full" style="background:var(--teal)"></div>
-            <span class="text-xs text-gray-400 font-medium">Networking con profesionales</span>
-          </div>
-        </div>
+        // Preloader Logic
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('preloader');
+            const fill = document.getElementById('loader-fill');
+            
+            // Animate progress bar (5 seconds)
+            gsap.to(fill, {
+                width: '100%',
+                duration: 5,
+                ease: "none",
+                onComplete: () => {
+                    // Fade out loader
+                    gsap.to(loader, {
+                        opacity: 0,
+                        duration: 0.8,
+                        onComplete: () => {
+                            loader.style.display = 'none';
+                            // Start Hero Animations
+                            startHeroAnimations();
+                        }
+                    });
+                }
+            });
+        });
 
-        <!-- Feature 5 — Full width -->
-        <div class="feature-card bg-gray-900 rounded-2xl p-7 text-white md:col-span-2 lg:col-span-2">
-          <div class="flex flex-col md:flex-row md:items-center gap-6">
-            <div class="flex items-start gap-4">
-              <div class="w-12 h-12 rounded-lg flex items-center justify-center font-display font-black text-2xl" style="background:var(--teal); color:white; flex-shrink:0">5</div>
-            </div>
-            <div class="flex-1">
-              <h3 class="font-display font-black uppercase text-3xl text-white mb-3">Acreditación Académica</h3>
-              <p class="text-gray-400 leading-relaxed">Obtén créditos estudiantiles mediante tu participación en actividades con valor académico. Cada taller, charla y evento suma a tu formación oficial.</p>
-            </div>
-            <div class="shrink-0 text-center p-6 rounded-xl" style="background:rgba(23,168,188,0.15); border: 1px solid rgba(23,168,188,0.3)">
-              <div class="font-display font-black text-5xl" style="color:var(--teal)">★</div>
-              <p class="text-white/60 text-xs font-semibold uppercase tracking-wide mt-1">Créditos válidos</p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- STATS / IMPACT -->
-  <section id="stats" class="py-24" style="background:var(--teal)">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <h2 class="font-display font-black uppercase text-5xl md:text-6xl text-white leading-tight">
-          UNA PLATAFORMA,<br/>INFINITAS OPORTUNIDADES
-        </h2>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div class="text-center p-8 rounded-2xl" style="background:rgba(255,255,255,0.12)">
-          <div class="font-display font-black text-white" style="font-size:3.5rem;line-height:1">+50</div>
-          <p class="text-white/70 font-medium mt-2 text-sm">Empresas vinculadas</p>
-        </div>
-        <div class="text-center p-8 rounded-2xl bg-white">
-          <div class="font-display font-black" style="font-size:3.5rem;line-height:1;color:var(--teal)">12</div>
-          <p class="text-gray-500 font-medium mt-2 text-sm">Talleres al año</p>
-        </div>
-        <div class="text-center p-8 rounded-2xl" style="background:rgba(255,255,255,0.12)">
-          <div class="font-display font-black text-white" style="font-size:3.5rem;line-height:1">100%</div>
-          <p class="text-white/70 font-medium mt-2 text-sm">Acceso gratuito</p>
-        </div>
-        <div class="text-center p-8 rounded-2xl bg-white">
-          <div class="font-display font-black" style="font-size:3.5rem;line-height:1;color:var(--teal)">∞</div>
-          <p class="text-gray-500 font-medium mt-2 text-sm">Posibilidades para ti</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="py-24 bg-white">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="text-center mb-16">
-        <span class="tag mb-4 inline-block">Cómo funciona</span>
-        <h2 class="font-display font-black uppercase text-5xl md:text-6xl text-gray-900">
-          3 PASOS PARA<br/><span style="color:var(--teal)">DESPEGAR</span>
-        </h2>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="text-center">
-          <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 font-display font-black text-4xl text-white" style="background:var(--teal)">01</div>
-          <h3 class="font-display font-black uppercase text-2xl text-gray-900 mb-3">Regístrate</h3>
-          <p class="text-gray-500 leading-relaxed">Crea tu perfil estudiantil con tu carrera y áreas de interés para recibir oportunidades personalizadas.</p>
-        </div>
-        <div class="text-center">
-          <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 font-display font-black text-4xl text-white" style="background:#111">02</div>
-          <h3 class="font-display font-black uppercase text-2xl text-gray-900 mb-3">Explora</h3>
-          <p class="text-gray-500 leading-relaxed">Navega la bolsa de trabajo, consulta el calendario de talleres y aplica a prácticas profesionales.</p>
-        </div>
-        <div class="text-center">
-          <div class="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 font-display font-black text-4xl" style="background:rgba(23,168,188,0.12); color:var(--teal)">03</div>
-          <h3 class="font-display font-black uppercase text-2xl text-gray-900 mb-3">Destaca</h3>
-          <p class="text-gray-500 leading-relaxed">Acumula créditos, amplía tu red de contactos y construye el perfil profesional que siempre soñaste.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA REGISTRO -->
-  <section id="registro" class="py-24 bg-gray-50">
-    <div class="max-w-3xl mx-auto px-6 text-center">
-      <span class="tag mb-6 inline-block">Únete al movimiento</span>
-      <h2 class="font-display font-black uppercase text-5xl md:text-7xl text-gray-900 leading-none mb-6">
-        TU MOMENTO<br/><span style="color:var(--teal)">ES AHORA.</span>
-      </h2>
-      <p class="text-gray-500 text-lg mb-10 max-w-xl mx-auto">
-        Sé parte de la plataforma que transformará cómo los estudiantes de Diseño de Imagen y Relaciones Públicas construyen su futuro profesional.
-      </p>
-
-      <!-- Simple form -->
-      <form class="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-left" onsubmit="handleSubmit(event)">
-        <div class="grid md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nombre completo</label>
-            <input type="text" placeholder="Tu nombre" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 text-sm" style="--tw-ring-color:var(--teal)" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='#e5e7eb'" />
-          </div>
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Correo institucional</label>
-            <input type="email" placeholder="estudiante@universidad.edu" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none text-sm" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='#e5e7eb'" />
-          </div>
-        </div>
-        <div class="mb-6">
-          <label class="block text-sm font-semibold text-gray-700 mb-1.5">¿Qué te interesa más?</label>
-          <select class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none text-sm text-gray-600" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='#e5e7eb'">
-            <option value="">Selecciona una opción</option>
-            <option>Bolsa de trabajo</option>
-            <option>Prácticas profesionales</option>
-            <option>Talleres y capacitaciones</option>
-            <option>Charlas con egresados</option>
-            <option>Créditos académicos</option>
-          </select>
-        </div>
-        <button type="submit" class="w-full py-4 rounded-xl text-white font-bold text-base transition-all hover:opacity-90 hover:scale-[1.02]" style="background:var(--teal)">
-          Quiero registrarme →
-        </button>
-        <p class="text-center text-xs text-gray-400 mt-4">Al registrarte aceptas recibir información sobre Match Profesional de Movimiento Proyecta.</p>
-      </form>
-
-      <!-- Success msg (hidden) -->
-      <div id="success-msg" class="hidden mt-6 p-4 rounded-xl text-white font-semibold" style="background:var(--teal)">
-        ¡Gracias! Tu registro fue recibido. Pronto te contactaremos. 🎉
-      </div>
-    </div>
-  </section>
-
-  <!-- FOOTER -->
-  <footer style="background:#111" class="text-white py-12">
-    <div class="max-w-6xl mx-auto px-6">
-      <div class="flex flex-col md:flex-row items-center justify-between gap-6">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:var(--teal)">
-            <span class="font-display font-black text-white text-sm">mp</span>
-          </div>
-          <div>
-            <p class="font-display font-black text-lg leading-tight" style="color:var(--teal)">Movimiento Proyecta</p>
-            <p class="text-gray-500 text-xs">Match Profesional · Propuesta #1</p>
-          </div>
-        </div>
-
-        <div class="text-center">
-          <p class="font-display font-black text-2xl uppercase" style="color:var(--teal)">"Conecta. Crece. Destaca."</p>
-        </div>
-
-        <div class="text-gray-500 text-xs text-center md:text-right">
-          <p>Diseño de Imagen y Relaciones Públicas</p>
-          <p class="mt-1">Dibanhi · Liliana · Cristy · Sofia</p>
-        </div>
-      </div>
-
-      <div class="mt-8 pt-8 border-t border-white/10 text-center text-gray-600 text-xs">
-        © 2025 Movimiento Proyecta. Todos los derechos reservados.
-      </div>
-    </div>
-  </footer>
-
-  <script>
-    function handleSubmit(e) {
-      e.preventDefault();
-      document.querySelector('form').style.display = 'none';
-      document.getElementById('success-msg').classList.remove('hidden');
-    }
-
-    // Intersection observer for scroll animations
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(el => {
-        if (el.isIntersecting) {
-          el.target.style.animation = 'fadeUp 0.7s ease forwards';
-          el.target.style.opacity = '0';
-          observer.unobserve(el.target);
+        function startHeroAnimations() {
+            const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+            tl.to('.reveal.hero-stagger', { 
+                opacity: 1, 
+                y: 0, 
+                duration: 1.2, 
+                stagger: 0.15 
+            })
+            .to('.hero-image', { 
+                opacity: 1, 
+                x: 0, 
+                rotate: 0, 
+                duration: 1.5 
+            }, "-=1");
         }
-      });
-    }, { threshold: 0.1 });
 
-    document.querySelectorAll('.feature-card').forEach(el => observer.observe(el));
-  </script>
+        // Reveal on Scroll Animations
+        const reveals = document.querySelectorAll('.reveal:not(.hero-stagger)');
+        reveals.forEach(el => {
+            let x = 0, y = 50;
+            if (el.classList.contains('reveal-left')) x = -80;
+            else if (el.classList.contains('reveal-right')) x = 80;
+            
+            gsap.fromTo(el, { opacity: 0, x: x, y: y }, { 
+                opacity: 1, x: 0, y: 0, duration: 1.5, ease: "power3.out",
+                scrollTrigger: { trigger: el, start: "top 90%" }
+            });
+        });
+
+        const nav = document.getElementById('main-nav');
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            if (currentScroll > 50) nav.classList.add('py-2', 'shadow-md');
+            else nav.classList.remove('py-2', 'shadow-md');
+            if (currentScroll > 500 && currentScroll > lastScroll) nav.classList.add('nav-hidden');
+            else nav.classList.remove('nav-hidden');
+            lastScroll = currentScroll;
+        });
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const btn = form.querySelector('button');
+            const success = document.getElementById('success-msg');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="animate-spin inline-block w-6 h-6 border-4 border-white/30 border-t-white rounded-full"></span>';
+            setTimeout(() => {
+                gsap.to(form, { opacity: 0, y: 20, duration: 0.5, onComplete: () => {
+                    form.classList.add('hidden');
+                    success.classList.remove('hidden');
+                    gsap.from(success, { scale: 0.8, opacity: 0, duration: 1, ease: "elastic.out(1, 0.3)" });
+                }});
+            }, 1500);
+        }
+    </script>
 </body>
 </html>
