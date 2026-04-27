@@ -46,53 +46,97 @@
             overflow-x: hidden;
         }
 
-        /* Preloader */
+        /* ─── Preloader Minimal ─────────────────────────────────── */
         #preloader {
             position: fixed;
             inset: 0;
-            background: #fff;
+            background: var(--brand-dark);
             z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        #preloader.exit { opacity: 0; transform: scale(1.02); }
+
+        .loader-content {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            transition: opacity 0.8s cubic-bezier(0.65, 0, 0.35, 1), visibility 0.8s;
         }
 
-        .loader-logo {
-            width: 80px;
-            height: 80px;
-            background: var(--brand-teal);
-            border-radius: 20px;
+        /* Orbit rings */
+        .loader-orbit {
+            position: relative;
+            width: 140px;
+            height: 140px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 24px;
-            animation: loader-pulse 2s infinite ease-in-out;
+            margin-bottom: 36px;
         }
-
-        @keyframes loader-pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(23, 168, 188, 0.4); }
-            50% { transform: scale(1.05); box-shadow: 0 0 40px 10px rgba(23, 168, 188, 0.2); }
-        }
-
-        .loader-progress {
-            width: 200px;
-            height: 3px;
-            background: #f0f0f0;
-            border-radius: 10px;
-            margin-top: 32px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .loader-progress-fill {
+        .loader-orbit::before,
+        .loader-orbit::after {
+            content: '';
             position: absolute;
-            top: 0; left: 0;
-            height: 100%;
-            background: var(--brand-teal);
-            width: 0;
+            border-radius: 50%;
+            border: 1px solid transparent;
         }
+        .loader-orbit::before {
+            inset: 0;
+            border-top-color: var(--brand-teal);
+            border-right-color: rgba(23,168,188,0.25);
+            animation: orbit-spin 2.4s linear infinite;
+        }
+        .loader-orbit::after {
+            inset: 14px;
+            border-bottom-color: var(--brand-apricot);
+            border-left-color: rgba(253,205,189,0.18);
+            animation: orbit-spin 1.6s linear infinite reverse;
+        }
+        @keyframes orbit-spin { to { transform: rotate(360deg); } }
+
+        /* Logo dot in center */
+        .loader-logo {
+            width: 56px;
+            height: 56px;
+            background: var(--brand-teal);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 24px rgba(23,168,188,0.45);
+            animation: logo-breathe 2.4s ease-in-out infinite;
+        }
+        @keyframes logo-breathe {
+            0%, 100% { transform: scale(1);    box-shadow: 0 0 24px rgba(23,168,188,0.4); }
+            50%      { transform: scale(1.06); box-shadow: 0 0 36px rgba(23,168,188,0.65); }
+        }
+
+        /* Brand text */
+        .loader-brand {
+            text-align: center;
+        }
+        .loader-brand-line {
+            display: block;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 900;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.85);
+            line-height: 1.5;
+            overflow: hidden;
+        }
+        .loader-brand-line + .loader-brand-line {
+            color: var(--brand-teal);
+        }
+        .loader-char {
+            display: inline-block;
+            transform: translateY(110%);
+            opacity: 0;
+        }
+        /* ─────────────────────────────────────────────────────── */
 
         /* Grain overlay */
         body::before {
@@ -190,15 +234,16 @@
 
     <!-- PRELOADER -->
     <div id="preloader">
-        <div class="loader-logo">
-            <span class="text-white font-logo text-5xl">mp</span>
-        </div>
-        <div class="text-center">
-            <h2 class="font-display font-black text-2xl tracking-tighter uppercase" style="color:var(--brand-teal)">Movimiento</h2>
-            <h2 class="font-display font-black text-2xl tracking-tighter uppercase" style="color:var(--brand-teal)">Proyecta</h2>
-        </div>
-        <div class="loader-progress">
-            <div class="loader-progress-fill" id="loader-fill"></div>
+        <div class="loader-content">
+            <div class="loader-orbit">
+                <div class="loader-logo">
+                    <span class="text-white font-logo" style="font-size:1.6rem;line-height:1">mp</span>
+                </div>
+            </div>
+            <div class="loader-brand">
+                <span class="loader-brand-line" id="loader-line1"></span>
+                <span class="loader-brand-line" id="loader-line2"></span>
+            </div>
         </div>
     </div>
 
@@ -459,7 +504,7 @@
                     <div class="relative w-full max-w-md">
                         <div class="absolute inset-0 border-4 border-brand-teal rounded-[4rem] rotate-6 translate-x-6 translate-y-6 opacity-30"></div>
                         <div class="relative aspect-[4/3] rounded-[4rem] overflow-hidden border-8 border-white/10 shadow-2xl">
-                            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80" alt="Equipo Proyecta" class="w-full h-full object-cover">
+                            <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&q=80" alt="Equipo Proyecta" class="w-full h-full object-cover">
                         </div>
                     </div>
                 </div>
@@ -567,30 +612,40 @@
     <script>
         gsap.registerPlugin(ScrollTrigger);
 
-        // Preloader Logic
+        // ── Preloader: Vortex ────────────────────────────────────
+        (function buildLoaderText() {
+            ['Movimiento','Proyecta'].forEach((word, wi) => {
+                const el = document.getElementById('loader-line' + (wi + 1));
+                word.split('').forEach(ch => {
+                    const s = document.createElement('span');
+                    s.className = 'loader-char';
+                    s.textContent = ch;
+                    el.appendChild(s);
+                });
+            });
+        })();
+
         window.addEventListener('load', () => {
             const loader = document.getElementById('preloader');
-            const fill = document.getElementById('loader-fill');
-            
-            // Animate progress bar (5 seconds)
-            gsap.to(fill, {
-                width: '100%',
-                duration: 3,
-                ease: "none",
-                onComplete: () => {
-                    // Fade out loader
-                    gsap.to(loader, {
-                        opacity: 0,
-                        duration: 0.8,
-                        onComplete: () => {
-                            loader.style.display = 'none';
-                            // Start Hero Animations
-                            startHeroAnimations();
-                        }
-                    });
-                }
+            const chars  = document.querySelectorAll('.loader-char');
+
+            gsap.to(chars, {
+                y: 0, opacity: 1,
+                duration: 0.7,
+                stagger: 0.04,
+                ease: 'power3.out',
+                delay: 0.3,
             });
+
+            setTimeout(() => {
+                loader.classList.add('exit');
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    startHeroAnimations();
+                }, 700);
+            }, 2200);
         });
+        // ─────────────────────────────────────────────────────────
 
         function startHeroAnimations() {
             const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
